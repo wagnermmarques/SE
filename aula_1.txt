@@ -1,0 +1,13 @@
+#define LED_PIN 9
+#define BUT_PIN 7
+
+void setup() {
+  pinMode(LED_PIN, OUTPUT);  
+  pinMode(BUT_PIN, INPUT); 
+}
+
+void loop() {
+  int but = digitalRead(BUT_PIN);
+  digitalWrite(LED_PIN, but);
+    
+}
