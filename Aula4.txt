@@ -1,0 +1,77 @@
+#define joyX A0
+#define joyY A1
+#define LED_GREEN 2
+#define LED_BLUE 3
+#define LED_RED 4
+#define BOT 8
+#define buzzer 10
+
+int xValue, yValue, x, y, bot, timer, teste, timer_old;
+
+void setup() {
+  Serial.begin(9600);
+  delay(500);
+  ADMUX   = 0;                  // usa o canal 0
+  ADMUX  |= (1 << REFS0);       // usa Vcc como referencia
+  ADCSRA |= (1 << ADEN);        // habilita o ADC
+  timer=timer_old=0;
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+  pinMode(BOT, INPUT_PULLUP);
+  pinMode(buzzer, OUTPUT);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  ADCSRA |= (1 << ADSC);        // inicia a conversao
+  while(ADCSRA & (1 << ADSC));  // espera a conversao
+
+  int v = ADCL;                 // tem que ser lido antes do ADCH
+  v = (ADCH << 8) + v;          // valor de 2 bytes
+  timer = millis();
+  xValue = analogRead(joyX);
+  yValue = analogRead(joyY);
+  bot = digitalRead(BOT);
+  y = abs(510 - xValue);
+  x = abs(514 - v);
+  
+        digitalWrite(LED_GREEN,LOW);
+        digitalWrite(LED_BLUE,LOW);
+        digitalWrite(LED_RED,LOW);
+        digitalWrite(LED_GREEN,LOW);
+        noTone(buzzer);
+
+     if( bot == 0 && timer-timer_old < 500){
+      digitalWrite(LED_GREEN,HIGH);}
+      else if ( bot == 0 && timer-timer_old>500 && timer-timer_old<1000){
+      digitalWrite(LED_BLUE,HIGH);}
+      else if ( bot == 0 && timer-timer_old>1000 && timer-timer_old<1500){
+      digitalWrite(LED_RED,HIGH);}
+      else if ( bot == 0 && timer-timer_old>1500&& timer-timer_old<2000){
+      digitalWrite(buzzer,1);}            
+      else{timer_old=timer;}
+
+
+
+  if (x < 20) {
+    digitalWrite(LED_GREEN, HIGH);
+  }
+  else if (x > 20 && x < 235) {
+    digitalWrite(LED_BLUE, HIGH);
+  }
+  else if (x > 235 && x < 480) {
+    digitalWrite(LED_RED, HIGH);
+  }
+  else if (x > 480) {
+    tone(buzzer, 15000);
+  }
+    //print the values with to plot or view
+  Serial.print(xValue);
+  Serial.print("\t");
+  Serial.print(v);
+  Serial.print("\t");
+  Serial.print(y);
+  Serial.print("\t");
+  Serial.println(x);
+}
