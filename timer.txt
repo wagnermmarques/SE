@@ -1,24 +1,26 @@
 int wag;
+int mlls;
 
 void setup() {
- Serial.begin(9600);
- TCCR1A = 0x00;            //Disable Timer1 while we set it up
- TIFR1  = 0x00;            //Timer1 INT Flag Reg: Clear Timer Overflow Flag
- TCCR1A = 0x00;           //Timer1 Control Reg A: Normal port operation, Wave Gen Mode normal
- TCCR1A |= (1<<CS10)|(1 << CS12);   // configura prescaler para 1024: CS12 = 1 e CS10 = 1
- TIMSK1 = 0X00;            //Desabilita int timer 1
- TCNT1  = 0xC2F7;              //Reset Timer Count to 0 
- //cli();                     //Desabilita interrupção
- wag = 0;
+  Serial.begin(9600);
+  TCCR1A = 0;                            //confira timer para operação normal pinos OC1A e OC1B desconectados
+  TCCR1B = 0;                           //limpa registrador
+  TCCR1B |= (1 << CS10) | (1 << CS12);  // configura prescaler para 1024: CS12 = 1 e CS10 = 1
+  TCNT1 = 0xC2F7;                       // incia timer com valor para que estouro ocorra em 1 segundo
+                                        // 65536-(16MHz/1024/1Hz) = 49911 = 0xC2F7
+  TIMSK1 = 0X00;                        //Desabilita int timer 1
+  wag = mlls = 0;
 }
 
 void loop() {
-while(!TIFR1){
-wag = wag+1;
-TIFR1 = 0x00; //Clear Timer Overflow Flag
-TCNT1  = 0xC2F7; //Reset Timer to 0
+  while (!TIFR1) {}
+  wag = wag + 1;
+  mlls = millis();
+  TIFR1 = 0b00000001; //Clear Timer Overflow Flag
+  TCNT1  = 0xC2F7; //Reset Timer to 0
+
+Serial.println(mlls);
 Serial.print("\t");
 Serial.println(wag);
- }
-} 
+}
  
